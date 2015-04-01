@@ -8,11 +8,26 @@ var topicList = JSON.parse(fs.readFileSync('./topic.json'))
 server.on('connection', function(client) {
 	console.log('client connected')
 	client.write(colors.rainbow('Welcome to RSVP!'))
+	client.write(colors.red('\nIf you require help, use the help command'))
 	client.write("\n")
 	client.write(colors.blue('\n' + 'Topic: ' + topicList[0].topic + '\n' + 'Date: ' + topicList[0].date + '\n'))
 	client.setEncoding('utf8')
 	client.on('data', function(stringFromClient) {
 		var clientRequestArray = stringFromClient.split(" ")
+
+		function help() {
+			client.write(colors.red('Welcome to the help menu!\n'))
+			client.write(colors.blue('To RSVP: enter rsvp, followed by your name and email\n'))
+			client.write(colors.blue('To list the number of attendees: enter list\n'))
+			client.write(colors.red('Admins may select the following features\n'))
+			client.write(colors.blue('To list the information of attendees: enter aList followed by your username and password\n'))
+			client.write(colors.blue('To clear a list of RSVPs: enter remove followed by your username and password\n'))
+			client.write(colors.blue('To changed the event topic and date: enter change followed by your username, password, topic and date\n'))
+		}
+		function kill() {
+			client.write(colors.rainbow('thanks for using my program!\n'))
+			client.end()
+		}
 
 		function reserveSpot() {
 			var nameToAdd = clientRequestArray[1].trim()
@@ -25,12 +40,12 @@ server.on('connection', function(client) {
 				if (err) console.log(err)
 			})
 			client.write(colors.green("RSVP added\n"))
-			client.end()
+			//client.end()
 		}
 
 		function listNumberOfDevs() {
 			client.write(colors.red('Developers attending: ' + rsvpList.length + '\n'))
-			client.end()
+			//client.end()
 		}
 
 		function adminListRSVP(login, pass) {
@@ -42,7 +57,7 @@ server.on('connection', function(client) {
 					client.write(colors.green(rsvpList[i].email + '\n'))
 				}
 			}
-			client.end()
+			//client.end()
 		}
 
 		function changeTopic(login, pass) {
@@ -59,7 +74,7 @@ server.on('connection', function(client) {
 			fs.writeFile('./topic.json', JSON.stringify(newTopicData), function(err) {
 				if (err) console.log(err)
 			})
-			client.write(colors.red('Topic and date changed'))
+			client.write(colors.red('Topic and date changed\n'))
 			client.end()
 		}
 
@@ -72,7 +87,7 @@ server.on('connection', function(client) {
 			fs.writeFile('./rsvp.json', JSON.stringify(rsvpList), function(err) {
 				if (err) console.log(err)
 			})
-			client.end()
+			//client.end()
 
 		}
 
@@ -96,6 +111,12 @@ server.on('connection', function(client) {
 				var pass = clientRequestArray[2].trim()
 				removeRSVP(login, pass)
 				break
+			case 'help':
+				help()
+				break
+			case 'kill':
+				kill()
+
 		}
 
 	})
